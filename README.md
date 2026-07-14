@@ -31,7 +31,7 @@ La solución combina procesamiento de datos LiDAR, visión artificial y una máq
 
 ## Detección de META
 
-![Meta detectada](images/meta_detectada.png)
+![Meta detectada](images/meta_detectado.png)
 
 ## Detección de PARE
 
