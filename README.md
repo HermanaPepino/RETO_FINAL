@@ -36,3 +36,7 @@ La solución combina procesamiento de datos LiDAR, visión artificial y una máq
 ## Detección de PARE
 
 ![PARE detectado](images/pare_detectado.png)
+
+# MÉTRICAS RESULTANTES DE LAS CORRIDAS
+
+![Métricas resultantes](images/metricas_corridas.png)
