@@ -23,7 +23,7 @@ La solución combina procesamiento de datos LiDAR, visión artificial, odometrí
 
 ## Estructura del proyecto
 
-````text
+```text
 RETO_FINAL/
 ├── code/
 │   ├── lidar_viz.py
@@ -42,8 +42,7 @@ RETO_FINAL/
 │   ├── pare_detectado.png
 │   └── robot_dashboard.png
 └── README.md
-
----
+```
 
 # Instrucciones de instalación y ejecución
 
@@ -59,7 +58,7 @@ Antes de comenzar, se debe comprobar lo siguiente:
 
 ```bash
 /home/pi/NuevoProyecto/
-````
+```
 
 Los archivos esperados son:
 
