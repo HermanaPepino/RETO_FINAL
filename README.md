@@ -31,8 +31,7 @@ RETO_FINAL/
 │   ├── pare_detector.py
 │   ├── q_table_granprix_FINAL.json
 │   ├── robot_dashboard.py
-│   ├── ver_pare_debug.py
-│   └── dashboard_g1.py
+│   └── ver_pare_debug.py
 ├── docs/
 │   └── RESULTADOS.md
 ├── images/
@@ -68,7 +67,6 @@ pare_detector.py
 ver_pare_debug.py
 robot_dashboard.py
 lidar_viz.py
-dashboard_g1.py
 q_table_granprix_FINAL.json
 ```
 
@@ -251,13 +249,6 @@ docker cp /home/pi/NuevoProyecto/robot_dashboard.py \
 ```bash
 docker cp /home/pi/NuevoProyecto/lidar_viz.py \
 "$CONTAINER_ID":/ros2_ws/src/capytown/capytown/lidar_viz.py
-```
-
-## Copiar el dashboard adicional del Grupo 1
-
-```bash
-docker cp /home/pi/NuevoProyecto/dashboard_g1.py \
-"$CONTAINER_ID":/ros2_ws/src/capytown/capytown/dashboard_g1.py
 ```
 
 ## Copiar la tabla Q
@@ -539,7 +530,6 @@ Deberían aparecer ejecutables similares a los siguientes:
 
 ```text
 capytown camera_publisher
-capytown dashboard_g1
 capytown lidar_viz
 capytown maze_solver
 capytown pare_detector
@@ -1343,7 +1333,6 @@ Los nodos que requieren `DISPLAY=:0` son:
 ver_pare_debug
 lidar_viz
 robot_dashboard
-dashboard_g1
 ```
 
 ---
