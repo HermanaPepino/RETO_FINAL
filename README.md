@@ -1,12 +1,12 @@
 # Reto Final de Robótica — CapyTown Grand Prix
 
-## Descripción del reto
+## Descripción del proyecto
 
-Este proyecto desarrolla un sistema de navegación autónoma para un robot Yahboom equipado con LiDAR, cámara y sensores de odometría.
+CapyTown Grand Prix es un sistema de navegación autónoma desarrollado para un robot Yahboom equipado con LiDAR, cámara y sensores de odometría.
 
-El objetivo del reto es que el robot recorra un laberinto de forma autónoma, evite obstáculos, detecte intersecciones y callejones, respete señales de PARE y se detenga al reconocer la META.
+El objetivo del proyecto es que el robot recorra un laberinto de forma autónoma, evite obstáculos, detecte intersecciones y callejones, respete señales de PARE y se detenga al reconocer visualmente la META.
 
-La solución combina procesamiento de datos LiDAR, visión artificial y una máquina de estados. Además, utiliza el algoritmo de Trémaux y aprendizaje por refuerzo mediante Q-learning para reducir recorridos repetidos y mejorar la toma de decisiones durante la navegación.
+La solución combina procesamiento de datos LiDAR, visión artificial, odometría y una máquina de estados. Además, utiliza el algoritmo de Trémaux y aprendizaje por refuerzo mediante Q-learning para reducir recorridos repetidos y mejorar la toma de decisiones durante la navegación.
 
 ## Funcionalidades principales
 
@@ -15,41 +15,33 @@ La solución combina procesamiento de datos LiDAR, visión artificial y una máq
 - Identificación de intersecciones y callejones.
 - Giros controlados utilizando la orientación del robot.
 - Memoria de caminos mediante el algoritmo de Trémaux.
-- Aprendizaje de decisiones con Q-learning.
+- Aprendizaje de decisiones mediante Q-learning.
 - Detección visual de señales PARE.
 - Detección visual de la META.
 - Detención de seguridad ante pérdida de sensores.
 - Registro de métricas del recorrido.
 
-## Dashboard del robot
+## Estructura del proyecto
 
-<p align="center">
-  <img src="images/robot_dashboard.png" alt="Dashboard del robot" width="700">
-</p>
-
-## Visualización del LiDAR
-
-<p align="center">
-  <img src="images/lidar_Viz.png" alt="Visualización del LiDAR" width="620">
-</p>
-
-## Detección de META
-
-<p align="center">
-  <img src="images/meta_detectado.png" alt="META detectada" width="540">
-</p>
-
-## Detección de PARE
-
-<p align="center">
-  <img src="images/pare_detectado.png" alt="Señal PARE detectada" width="540">
-</p>
-
-# Métricas resultantes de las corridas
-
-<p align="center">
-  <img src="images/metricas_corridas.png" alt="Métricas resultantes de las corridas" width="700">
-</p>
+````text
+RETO_FINAL/
+├── code/
+│   ├── lidar_viz.py
+│   ├── maze_solver.py
+│   ├── pare_detector.py
+│   ├── q_table_granprix_FINAL.json
+│   ├── robot_dashboard.py
+│   ├── ver_pare_debug.py
+│   └── dashboard_g1.py
+├── docs/
+│   └── RESULTADOS.md
+├── images/
+│   ├── lidar_Viz.png
+│   ├── meta_detectado.png
+│   ├── metricas_corridas.png
+│   ├── pare_detectado.png
+│   └── robot_dashboard.png
+└── README.md
 
 ---
 
@@ -67,7 +59,7 @@ Antes de comenzar, se debe comprobar lo siguiente:
 
 ```bash
 /home/pi/NuevoProyecto/
-```
+````
 
 Los archivos esperados son:
 
