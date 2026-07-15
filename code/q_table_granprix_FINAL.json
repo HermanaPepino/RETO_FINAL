@@ -1,0 +1,23 @@
+{
+  "c1,-5|h2|FMDMIA|o001": {
+    "izquierda": 0.075
+  },
+  "c1,-6|h3|FMDMIA|o001": {
+    "izquierda": 30.0
+  },
+  "c2,-3|h3|FMDCIA|o001": {
+    "izquierda": 0.45
+  },
+  "c2,-3|h3|FMDMIM|o001": {
+    "izquierda": 0.075
+  },
+  "c3,-3|h3|FMDAIC|o100": {
+    "derecha": 30.0
+  },
+  "c3,0|h0|FADAIM|o110": {
+    "derecha": 0.765
+  },
+  "c4,-3|h0|FMDAIM|o111": {
+    "derecha": 0.45
+  }
+}
