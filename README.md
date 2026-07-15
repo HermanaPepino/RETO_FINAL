@@ -62,7 +62,8 @@ Antes de comenzar, se debe comprobar lo siguiente:
 - El contenedor Docker del robot debe estar iniciado.
 - ROS 2 debe estar instalado y configurado dentro del contenedor.
 - El LiDAR, la cámara y la odometría deben encontrarse conectados.
-- Los archivos del proyecto deben estar en la siguiente carpeta de la Raspberry Pi:
+- Los archivos del proyecto deben estar disponibles en la Raspberry Pi.
+- La carpeta del proyecto debe encontrarse en:
 
 ```bash
 /home/pi/NuevoProyecto/
@@ -80,38 +81,116 @@ dashboard_g1.py
 q_table_granprix_FINAL.json
 ```
 
-En estas instrucciones se utiliza el siguiente identificador de contenedor:
+---
 
-```text
-28404cc840d6
-```
+# 2. Identificación del contenedor Docker
 
-Este identificador puede verificarse desde la Raspberry Pi ejecutando:
+El identificador del contenedor Docker no es fijo.
+
+Puede cambiar cuando:
+
+- Se recrea el contenedor.
+- Se elimina y vuelve a iniciar.
+- Se cambia la imagen Docker.
+- Se ejecuta el proyecto en otro robot.
+- Docker asigna un nuevo identificador.
+
+Por este motivo, no se utiliza un ID fijo en las instrucciones.
+
+Desde una terminal normal de la Raspberry Pi, ejecutar:
 
 ```bash
 docker ps
 ```
 
-Si el identificador mostrado por `docker ps` es diferente, se debe reemplazar `28404cc840d6` en todos los comandos.
+También se puede utilizar una vista más clara:
+
+```bash
+docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}"
+```
+
+El comando mostrará información similar a:
+
+```text
+CONTAINER ID   NAMES          IMAGE                    STATUS
+28404cc840d6   nice_euler     yahboomcar_ros2:latest   Up 20 minutes
+```
+
+Se debe identificar el contenedor que ejecuta ROS 2 para el robot.
+
+Después, guardar su identificador en una variable:
+
+```bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
+```
+
+Por ejemplo:
+
+```bash
+export CONTAINER_ID=28404cc840d6
+```
+
+El valor anterior es solamente un ejemplo. Se debe utilizar el identificador mostrado por `docker ps`.
+
+Verificar que la variable contiene el ID:
+
+```bash
+echo "$CONTAINER_ID"
+```
+
+También se puede comprobar que el contenedor responde:
+
+```bash
+docker exec "$CONTAINER_ID" bash -lc 'echo "Contenedor encontrado correctamente"'
+```
+
+Debe aparecer:
+
+```text
+Contenedor encontrado correctamente
+```
+
+> La variable `CONTAINER_ID` solamente existe en la terminal donde fue definida.
+> Al abrir una terminal nueva, se debe volver a ejecutar:
+
+```bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
+```
 
 ---
 
-# 2. Creación inicial del paquete ROS 2
+# 3. Creación inicial del paquete ROS 2
 
-Esta preparación solo es necesaria cuando se crea nuevamente el workspace, se eliminó el paquete o se desea realizar una instalación limpia.
+Esta preparación solo es necesaria cuando:
+
+- Se crea nuevamente el workspace.
+- Se eliminó el paquete.
+- Se modificó completamente la estructura.
+- Se desea realizar una instalación limpia.
 
 ## Terminal de preparación
 
-Abrir una terminal en la Raspberry Pi e ingresar al contenedor:
+Primero, definir el ID del contenedor:
 
 ```bash
-docker exec -it 28404cc840d6 bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
 ```
 
-Dentro del contenedor, eliminar el workspace anterior y crear uno nuevo:
+Ingresar al contenedor:
+
+```bash
+docker exec -it "$CONTAINER_ID" bash
+```
+
+Dentro del contenedor, eliminar el workspace anterior:
 
 ```bash
 rm -rf /ros2_ws
+```
+
+Crear nuevamente la estructura del workspace:
+
+```bash
 mkdir -p /ros2_ws/src
 cd /ros2_ws/src
 ```
@@ -132,75 +211,87 @@ exit
 
 ---
 
-# 3. Copia de los archivos al contenedor
+# 4. Copia de los archivos al contenedor
 
-Los siguientes comandos se ejecutan desde la terminal normal de la Raspberry Pi, fuera del contenedor.
+Los siguientes comandos se ejecutan desde una terminal normal de la Raspberry Pi, fuera del contenedor.
 
-Copiar el nodo principal de navegación:
+Comprobar que la variable continúa definida:
+
+```bash
+echo "$CONTAINER_ID"
+```
+
+Si el comando no muestra ningún valor, volver a definirla:
+
+```bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
+```
+
+## Copiar el nodo principal de navegación
 
 ```bash
 docker cp /home/pi/NuevoProyecto/maze_solver.py \
-28404cc840d6:/ros2_ws/src/capytown/capytown/maze_solver.py
+"$CONTAINER_ID":/ros2_ws/src/capytown/capytown/maze_solver.py
 ```
 
-Copiar el nodo de detección de señales:
+## Copiar el detector de señales
 
 ```bash
 docker cp /home/pi/NuevoProyecto/pare_detector.py \
-28404cc840d6:/ros2_ws/src/capytown/capytown/pare_detector.py
+"$CONTAINER_ID":/ros2_ws/src/capytown/capytown/pare_detector.py
 ```
 
-Copiar el visualizador de depuración de cámara:
+## Copiar el visualizador de depuración de cámara
 
 ```bash
 docker cp /home/pi/NuevoProyecto/ver_pare_debug.py \
-28404cc840d6:/ros2_ws/src/capytown/capytown/ver_pare_debug.py
+"$CONTAINER_ID":/ros2_ws/src/capytown/capytown/ver_pare_debug.py
 ```
 
-Copiar el dashboard principal:
+## Copiar el dashboard principal
 
 ```bash
 docker cp /home/pi/NuevoProyecto/robot_dashboard.py \
-28404cc840d6:/ros2_ws/src/capytown/capytown/robot_dashboard.py
+"$CONTAINER_ID":/ros2_ws/src/capytown/capytown/robot_dashboard.py
 ```
 
-Copiar el visualizador del LiDAR:
+## Copiar el visualizador del LiDAR
 
 ```bash
 docker cp /home/pi/NuevoProyecto/lidar_viz.py \
-28404cc840d6:/ros2_ws/src/capytown/capytown/lidar_viz.py
+"$CONTAINER_ID":/ros2_ws/src/capytown/capytown/lidar_viz.py
 ```
 
-Copiar el dashboard adicional del Grupo 1:
+## Copiar el dashboard adicional del Grupo 1
 
 ```bash
 docker cp /home/pi/NuevoProyecto/dashboard_g1.py \
-28404cc840d6:/ros2_ws/src/capytown/capytown/dashboard_g1.py
+"$CONTAINER_ID":/ros2_ws/src/capytown/capytown/dashboard_g1.py
 ```
 
-Copiar la tabla Q utilizada por el algoritmo de Q-learning:
+## Copiar la tabla Q
 
 ```bash
 docker cp /home/pi/NuevoProyecto/q_table_granprix_FINAL.json \
-28404cc840d6:/ros2_ws/q_table_granprix.json
+"$CONTAINER_ID":/ros2_ws/q_table_granprix.json
 ```
 
-La tabla se copia con el nombre:
+Dentro del contenedor, la tabla queda disponible en:
 
 ```text
 /ros2_ws/q_table_granprix.json
 ```
 
-Este es el archivo que utiliza el nodo de navegación para consultar y actualizar los valores aprendidos.
+Este archivo almacena los valores utilizados por el algoritmo de Q-learning para seleccionar acciones y conservar decisiones aprendidas.
 
 ---
 
-# 4. Creación del nodo publicador de cámara
+# 5. Creación del nodo publicador de cámara
 
-Volver a ingresar al contenedor:
+Ingresar nuevamente al contenedor:
 
 ```bash
-docker exec -it 28404cc840d6 bash
+docker exec -it "$CONTAINER_ID" bash
 ```
 
 Crear el archivo `camera_publisher.py`:
@@ -243,6 +334,7 @@ class CameraPublisher(Node):
             raise RuntimeError(f'No se pudo abrir /dev/video{device}')
 
         self.publisher = self.create_publisher(Image, topic, 10)
+
         self.timer = self.create_timer(
             1.0 / max(self.fps, 1.0),
             self.publicar
@@ -307,11 +399,11 @@ Este nodo abre la cámara física del robot y publica las imágenes en el tópic
 /camera/image_raw
 ```
 
-El nodo `pare_detector` se suscribe a este tópico para detectar las señales de PARE y META.
+El nodo `pare_detector` recibe estas imágenes para identificar las señales de PARE y META.
 
 ---
 
-# 5. Configuración del archivo setup.py
+# 6. Configuración del archivo setup.py
 
 Crear o reemplazar el archivo `setup.py`:
 
@@ -357,9 +449,9 @@ setup(
 PY
 ```
 
-El archivo `setup.py` registra los nodos del proyecto como comandos ejecutables de ROS 2.
+El archivo `setup.py` registra los nodos como ejecutables de ROS 2.
 
-Gracias a esta configuración, los nodos pueden iniciarse utilizando comandos como:
+Gracias a este archivo, los nodos pueden iniciarse mediante comandos como:
 
 ```bash
 ros2 run capytown maze_solver
@@ -367,11 +459,11 @@ ros2 run capytown maze_solver
 
 ---
 
-# 6. Verificación de las funciones main()
+# 7. Verificación de las funciones main()
 
-Los archivos `lidar_viz.py` y `robot_dashboard.py` deben tener una función `main()` para que ROS 2 pueda ejecutarlos mediante las entradas declaradas en `setup.py`.
+Los archivos `lidar_viz.py` y `robot_dashboard.py` deben contener una función `main()` para ser ejecutados mediante `ros2 run`.
 
-Ejecutar el siguiente script dentro del contenedor:
+Ejecutar dentro del contenedor:
 
 ```bash
 python3 - <<'PY'
@@ -411,20 +503,32 @@ if __name__ == '__main__':
 PY
 ```
 
-El script revisa ambos archivos:
+Este script realiza lo siguiente:
 
-- Si ya tienen una función `main()`, no realiza cambios.
-- Si no tienen una función `main()`, la agrega automáticamente.
+- Revisa si cada archivo ya contiene una función `main()`.
+- Si ya existe, no modifica el archivo.
+- Si no existe, agrega automáticamente una función principal.
+- Permite que ROS 2 pueda ejecutar los nodos mediante `setup.py`.
 
 ---
 
-# 7. Compilación del proyecto
+# 8. Compilación del proyecto
 
-Dentro del contenedor, ejecutar:
+Dentro del contenedor, dirigirse al workspace:
 
 ```bash
 cd /ros2_ws
+```
+
+Eliminar resultados de compilaciones anteriores:
+
+```bash
 rm -rf build install log
+```
+
+Compilar el paquete:
+
+```bash
 colcon build --packages-select capytown --symlink-install
 ```
 
@@ -434,7 +538,7 @@ Cuando la compilación termine correctamente, cargar el workspace:
 source /ros2_ws/install/setup.bash
 ```
 
-Para verificar que ROS 2 reconoce los ejecutables:
+Verificar los ejecutables registrados:
 
 ```bash
 ros2 pkg executables capytown
@@ -460,32 +564,52 @@ exit
 
 ---
 
-# 8. Ejecución del sistema
+# 9. Preparación de las terminales de ejecución
 
-Para ejecutar el proyecto completo se utilizan seis terminales.
+Para ejecutar el sistema completo se utilizan seis terminales.
 
-Cada nodo debe permanecer ejecutándose en su propia terminal. No se debe cerrar una terminal después de iniciar un nodo.
+Cada nodo debe permanecer abierto en su propia terminal.
 
 El orden recomendado es:
 
 1. Publicador de cámara.
-2. Detector de señales.
-3. Ventana de depuración visual.
+2. Detector de PARE y META.
+3. Visualización de depuración de cámara.
 4. Visualización del LiDAR.
 5. Dashboard del robot.
 6. Navegación autónoma.
 
----
-
-## Terminal 1 — Publicador de cámara
-
-Abrir una nueva terminal en la Raspberry Pi:
+En cada terminal nueva se debe volver a definir el identificador del contenedor:
 
 ```bash
-docker exec -it 28404cc840d6 bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
 ```
 
-Dentro del contenedor, ejecutar:
+También se puede consultar nuevamente mediante:
+
+```bash
+docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}"
+```
+
+---
+
+# 10. Terminal 1 — Publicador de cámara
+
+Abrir la primera terminal.
+
+Definir el contenedor:
+
+```bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
+```
+
+Ingresar al contenedor:
+
+```bash
+docker exec -it "$CONTAINER_ID" bash
+```
+
+Preparar el entorno de ROS 2:
 
 ```bash
 cd /ros2_ws
@@ -493,7 +617,7 @@ source install/setup.bash
 export ROS_DOMAIN_ID=20
 ```
 
-Iniciar el nodo de cámara:
+Iniciar la cámara:
 
 ```bash
 ros2 run capytown camera_publisher --ros-args \
@@ -502,26 +626,28 @@ ros2 run capytown camera_publisher --ros-args \
 
 Esta terminal debe permanecer abierta.
 
-El nodo publica las imágenes capturadas por la cámara en:
+El nodo publica las imágenes en:
 
 ```text
 /camera/image_raw
 ```
 
-Para verificar la publicación se puede abrir otra terminal temporal y ejecutar:
-
-```bash
-ros2 topic hz /camera/image_raw
-```
-
 ---
 
-## Terminal 2 — Detector de PARE y META
+# 11. Terminal 2 — Detector de PARE y META
 
-Abrir otra terminal:
+Abrir la segunda terminal.
+
+Definir el contenedor:
 
 ```bash
-docker exec -it 28404cc840d6 bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
+```
+
+Ingresar al contenedor:
+
+```bash
+docker exec -it "$CONTAINER_ID" bash
 ```
 
 Preparar el entorno:
@@ -536,7 +662,7 @@ Se debe elegir solamente uno de los siguientes perfiles.
 
 No se deben ejecutar los tres perfiles al mismo tiempo.
 
-### Perfil 1 — Detección estricta
+## Perfil 1 — Detección estricta
 
 ```bash
 ros2 run capytown pare_detector --ros-args \
@@ -547,11 +673,16 @@ ros2 run capytown pare_detector --ros-args \
 -p meta_v_min:=50
 ```
 
-Este perfil exige que la región detectada sea grande, tenga suficiente saturación y sea observada durante varios fotogramas.
+Este perfil requiere:
 
-Reduce falsos positivos, pero requiere que la señal META se encuentre más cerca o sea más visible.
+- Una región visual más grande.
+- Mayor saturación.
+- Mayor nivel de brillo.
+- Más fotogramas consecutivos de confirmación.
 
-### Perfil 2 — Detección menos estricta
+Reduce los falsos positivos, pero puede requerir que la señal se encuentre más cerca de la cámara.
+
+## Perfil 2 — Detección menos estricta
 
 ```bash
 ros2 run capytown pare_detector --ros-args \
@@ -564,9 +695,9 @@ ros2 run capytown pare_detector --ros-args \
 
 Este perfil permite detectar la META desde una mayor distancia.
 
-Es más sensible, pero puede aumentar la posibilidad de detectar objetos similares por error.
+Es más sensible, pero también puede aumentar la posibilidad de falsas detecciones.
 
-### Perfil 3 — Detección más estricta para PARE y META
+## Perfil 3 — Detección más estricta para PARE y META
 
 ```bash
 ros2 run capytown pare_detector --ros-args \
@@ -580,20 +711,28 @@ ros2 run capytown pare_detector --ros-args \
 -p meta_v_min:=50
 ```
 
-Este perfil aplica restricciones adicionales tanto para la señal PARE como para la META.
+Este perfil aplica restricciones adicionales para las señales PARE y META.
 
-Es el perfil recomendado cuando existen muchos elementos rojos o verdes alrededor del circuito que podrían causar falsas detecciones.
+Es recomendable cuando existen objetos rojos o verdes alrededor del circuito que puedan causar falsas detecciones.
 
-Esta terminal debe permanecer abierta.
+La terminal debe permanecer abierta después de ejecutar el perfil seleccionado.
 
 ---
 
-## Terminal 3 — Depuración visual de PARE y META
+# 12. Terminal 3 — Depuración visual de PARE y META
 
-Abrir otra terminal:
+Abrir la tercera terminal.
+
+Definir el contenedor:
 
 ```bash
-docker exec -it 28404cc840d6 bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
+```
+
+Ingresar al contenedor:
+
+```bash
+docker exec -it "$CONTAINER_ID" bash
 ```
 
 Preparar el entorno:
@@ -614,22 +753,31 @@ ros2 run capytown ver_pare_debug
 Esta ventana permite observar:
 
 - La imagen recibida desde la cámara.
-- Las regiones analizadas.
 - Las máscaras de color.
+- Las regiones detectadas.
+- Los contornos encontrados.
 - La detección de la señal PARE.
 - La detección de la META.
-- Los cuadros o contornos encontrados por el detector.
+- El comportamiento de los umbrales visuales.
 
 Esta terminal debe permanecer abierta.
 
 ---
 
-## Terminal 4 — Visualización del LiDAR
+# 13. Terminal 4 — Visualización del LiDAR
 
-Abrir otra terminal:
+Abrir la cuarta terminal.
+
+Definir el contenedor:
 
 ```bash
-docker exec -it 28404cc840d6 bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
+```
+
+Ingresar al contenedor:
+
+```bash
+docker exec -it "$CONTAINER_ID" bash
 ```
 
 Preparar el entorno:
@@ -650,23 +798,31 @@ ros2 run capytown lidar_viz
 La visualización permite observar:
 
 - Los puntos detectados alrededor del robot.
+- Las paredes del laberinto.
 - La distancia frontal.
 - Las distancias laterales.
-- Las paredes del laberinto.
 - Los espacios abiertos.
 - Los posibles obstáculos.
-- Las intersecciones detectadas por el sistema.
+- La distribución de las mediciones del LiDAR.
 
 Esta terminal debe permanecer abierta.
 
 ---
 
-## Terminal 5 — Dashboard del robot
+# 14. Terminal 5 — Dashboard del robot
 
-Abrir otra terminal:
+Abrir la quinta terminal.
+
+Definir el contenedor:
 
 ```bash
-docker exec -it 28404cc840d6 bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
+```
+
+Ingresar al contenedor:
+
+```bash
+docker exec -it "$CONTAINER_ID" bash
 ```
 
 Preparar el entorno:
@@ -684,25 +840,26 @@ Ejecutar el dashboard principal:
 ros2 run capytown robot_dashboard
 ```
 
-El dashboard muestra información relacionada con:
+El dashboard permite visualizar información como:
 
-- Estado actual del robot.
-- Estado de la máquina de navegación.
-- Distancias detectadas.
+- Estado actual de la navegación.
+- Estado de la máquina de estados.
+- Distancias obtenidas por el LiDAR.
 - Acción seleccionada.
-- Orientación y odometría.
+- Orientación del robot.
+- Información de odometría.
 - Señales visuales detectadas.
-- Intersecciones.
-- Decisiones del algoritmo.
+- Intersecciones encontradas.
+- Decisiones tomadas.
 - Métricas acumuladas durante el recorrido.
 
 Esta terminal debe permanecer abierta.
 
-### Dashboard alternativo
+## Dashboard alternativo
 
-El archivo `dashboard_g1.py` también está registrado como ejecutable.
+El archivo `dashboard_g1.py` también se encuentra registrado como ejecutable.
 
-Puede utilizarse en lugar de `robot_dashboard` ejecutando:
+Puede iniciarse con:
 
 ```bash
 ros2 run capytown dashboard_g1
@@ -710,23 +867,104 @@ ros2 run capytown dashboard_g1
 
 No es obligatorio ejecutar ambos dashboards al mismo tiempo.
 
+Se debe utilizar el dashboard que corresponda a la versión final del proyecto.
+
 ---
 
-## Terminal 6 — Navegación autónoma
+# 15. Verificación de los sensores antes de mover el robot
 
-La navegación debe iniciarse después de comprobar que:
+Antes de ejecutar `maze_solver`, se recomienda comprobar que los sensores están publicando correctamente.
+
+Se puede utilizar una terminal adicional temporal o alguna de las terminales antes de iniciar su nodo definitivo.
+
+Ingresar al contenedor:
+
+```bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
+docker exec -it "$CONTAINER_ID" bash
+```
+
+Preparar ROS 2:
+
+```bash
+cd /ros2_ws
+source install/setup.bash
+export ROS_DOMAIN_ID=20
+```
+
+Mostrar los tópicos disponibles:
+
+```bash
+ros2 topic list
+```
+
+Como mínimo, deberían encontrarse tópicos equivalentes a:
+
+```text
+/camera/image_raw
+/scan
+/odom_raw
+/cmd_vel
+```
+
+## Verificar la cámara
+
+```bash
+ros2 topic hz /camera/image_raw
+```
+
+## Verificar el LiDAR
+
+```bash
+ros2 topic hz /scan
+```
+
+## Verificar la odometría
+
+```bash
+ros2 topic hz /odom_raw
+```
+
+## Verificar el tópico de movimiento
+
+```bash
+ros2 topic info /cmd_vel
+```
+
+Los comandos `ros2 topic hz` continúan ejecutándose hasta que se presiona:
+
+```text
+Ctrl + C
+```
+
+Si alguno de los sensores no publica información, no se debe iniciar la navegación.
+
+---
+
+# 16. Terminal 6 — Navegación autónoma
+
+El nodo de navegación debe iniciarse después de confirmar que:
 
 - La cámara está publicando imágenes.
 - El detector de señales está activo.
-- El LiDAR está publicando datos.
+- El LiDAR está publicando mediciones.
 - La odometría está disponible.
-- Las ventanas de depuración funcionan.
-- El robot se encuentra correctamente colocado en la salida.
+- Las ventanas de visualización funcionan.
+- El robot está correctamente colocado en la salida.
+- No existen personas u objetos peligrosos frente al robot.
 
-Abrir la sexta terminal:
+Abrir la sexta terminal.
+
+Definir el contenedor:
 
 ```bash
-docker exec -it 28404cc840d6 bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
+```
+
+Ingresar al contenedor:
+
+```bash
+docker exec -it "$CONTAINER_ID" bash
 ```
 
 Preparar el entorno:
@@ -778,171 +1016,254 @@ ros2 run capytown maze_solver --ros-args \
 
 Al ejecutar este comando, el robot comienza la navegación autónoma.
 
+Esta terminal debe permanecer abierta durante toda la corrida.
+
 ---
 
-# 9. Explicación de los principales parámetros
+# 17. Explicación de los parámetros principales
 
 ## Parámetros de Q-learning
 
-```text
-qlearn_enabled
-```
+### `qlearn_enabled`
 
-Activa o desactiva el uso de Q-learning.
+Activa o desactiva el uso del algoritmo de Q-learning.
 
 ```text
-q_epsilon
+qlearn_enabled = true
 ```
 
-Controla la probabilidad de que el robot explore una decisión diferente.
+Indica que el robot utilizará la tabla Q para apoyar la selección de caminos.
 
-Con:
+### `q_epsilon`
+
+Controla la probabilidad de realizar una acción exploratoria.
 
 ```text
 q_epsilon = 0.0
 ```
 
-el robot no realiza exploración aleatoria y utiliza las decisiones conocidas de la tabla Q.
+Con este valor, el robot evita decisiones aleatorias y utiliza principalmente las acciones conocidas en la tabla Q.
+
+### `q_alpha`
+
+Controla cuánto influyen las experiencias nuevas en los valores aprendidos.
 
 ```text
-q_alpha
+q_alpha = 0.30
 ```
 
-Controla cuánto afectan las experiencias nuevas a los valores almacenados en la tabla Q.
+Un valor de `0.30` permite actualizar el aprendizaje sin reemplazar completamente la información anterior.
 
 ---
 
 ## Parámetros de movimiento
 
-```text
-v_forward
-```
+### `v_forward`
 
 Velocidad lineal utilizada durante el avance normal.
 
 ```text
-turn_speed
+v_forward = 0.050
 ```
 
-Velocidad angular utilizada durante los giros.
+### `turn_speed`
+
+Velocidad angular principal utilizada durante los giros.
 
 ```text
-front_stop
+turn_speed = 0.16
 ```
 
-Distancia frontal mínima a partir de la cual el robot considera que existe un obstáculo.
+### `front_stop`
+
+Distancia frontal a partir de la cual se considera que existe un obstáculo cercano.
 
 ```text
-turn_slowdown_deg
+front_stop = 0.42
 ```
 
-Cantidad de grados restantes a partir de la cual el robot comienza a reducir la velocidad de giro.
+### `turn_slowdown_deg`
+
+Cantidad de grados restantes a partir de la cual se reduce la velocidad de giro.
 
 ```text
-turn_near_speed
+turn_slowdown_deg = 25.0
 ```
+
+### `turn_near_speed`
 
 Velocidad angular utilizada cuando el robot se encuentra cerca de completar el giro.
+
+```text
+turn_near_speed = 0.10
+```
+
+### `turn_brake_margin_deg`
+
+Margen utilizado para evitar que el robot sobrepase el ángulo objetivo.
+
+```text
+turn_brake_margin_deg = 0.5
+```
 
 ---
 
 ## Parámetros de intersecciones
 
-```text
-side_open
-```
+### `side_open`
 
-Distancia lateral utilizada para considerar que existe un camino abierto.
+Distancia lateral necesaria para considerar que existe un camino abierto.
 
 ```text
-side_confirm_ticks
+side_open = 1.10
 ```
+
+### `side_confirm_ticks`
 
 Cantidad de lecturas consecutivas necesarias para confirmar una apertura lateral.
 
 ```text
-intersection_center_distance_m
+side_confirm_ticks = 7
 ```
 
-Distancia que el robot avanza para aproximarse al centro de una intersección antes de tomar una decisión.
+Esto evita registrar como intersección una única lectura incorrecta del LiDAR.
+
+### `intersection_min_exit_m`
+
+Distancia mínima necesaria para considerar que el robot ya salió de una intersección.
 
 ```text
-intersection_cooldown_s
+intersection_min_exit_m = 0.48
 ```
 
-Tiempo durante el cual se evita volver a registrar inmediatamente la misma intersección.
+### `intersection_center_distance_m`
+
+Distancia que el robot avanza para aproximarse al centro de la intersección.
 
 ```text
-memory_node_radius
+intersection_center_distance_m = 0.11
 ```
 
-Radio utilizado para determinar si una posición corresponde a una intersección ya registrada.
+### `intersection_center_timeout_s`
+
+Tiempo máximo permitido para realizar el centrado.
+
+```text
+intersection_center_timeout_s = 3.50
+```
+
+### `intersection_center_v`
+
+Velocidad empleada durante el avance hacia el centro de la intersección.
+
+```text
+intersection_center_v = 0.040
+```
+
+### `intersection_cooldown_s`
+
+Tiempo durante el cual se evita detectar inmediatamente la misma intersección.
+
+```text
+intersection_cooldown_s = 6.5
+```
+
+### `memory_node_radius`
+
+Radio empleado para decidir si una posición pertenece a una intersección ya registrada.
+
+```text
+memory_node_radius = 0.45
+```
 
 ---
 
 ## Parámetros de giro
 
-```text
-giro_yaw_min_deg
-```
+### `giro_yaw_min_deg`
 
-Cambio mínimo de orientación requerido para considerar terminado un giro de aproximadamente 90 grados.
+Cambio mínimo de orientación requerido para completar un giro cercano a 90 grados.
 
 ```text
-media_yaw_min_deg
+giro_yaw_min_deg = 84.0
 ```
 
-Cambio mínimo de orientación requerido para considerar terminada una media vuelta.
+### `media_yaw_min_deg`
+
+Cambio mínimo de orientación requerido para completar una media vuelta.
 
 ```text
-giro_timeout_s
+media_yaw_min_deg = 165.0
 ```
+
+### `giro_timeout_s`
 
 Tiempo máximo permitido para completar un giro normal.
 
 ```text
-media_timeout_s
+giro_timeout_s = 16.0
 ```
+
+### `media_timeout_s`
 
 Tiempo máximo permitido para completar una media vuelta.
 
 ```text
-giro_front_safety
+media_timeout_s = 28.0
 ```
 
-Distancia frontal de seguridad durante la ejecución de un giro.
+### `giro_front_safety`
+
+Distancia frontal mínima de seguridad durante un giro.
+
+```text
+giro_front_safety = 0.22
+```
 
 ---
 
 ## Parámetros de detección de META
 
-```text
-meta_confirm_s
-```
+### `meta_confirm_s`
 
-Tiempo durante el cual la detección de META debe mantenerse antes de ser aceptada.
+Tiempo durante el cual la detección de META debe mantenerse antes de aceptarla.
 
 ```text
-meta_min_distance_m
+meta_confirm_s = 0.80
 ```
 
-Distancia mínima que debe haber recorrido el robot antes de permitir la finalización por META.
+### `meta_min_distance_m`
+
+Distancia mínima que debe recorrer el robot antes de permitir la finalización por META.
 
 ```text
-meta_min_runtime_s
+meta_min_distance_m = 2.50
 ```
 
-Tiempo mínimo que debe haber transcurrido desde el inicio de la carrera antes de aceptar la META.
+### `meta_min_runtime_s`
 
-Estas restricciones evitan que el robot termine accidentalmente la carrera debido a una detección falsa al inicio.
+Tiempo mínimo desde el inicio de la corrida antes de aceptar la META.
+
+```text
+meta_min_runtime_s = 25.0
+```
+
+Estas restricciones ayudan a evitar que una detección falsa al inicio de la carrera detenga inmediatamente al robot.
 
 ---
 
-# 10. Reinicio opcional de la tabla Q
+# 18. Reinicio opcional de la tabla Q
 
-Para comenzar una corrida sin utilizar el archivo de aprendizaje anterior, se puede eliminar la tabla Q antes de ejecutar `maze_solver`.
+Para comenzar una corrida sin utilizar el aprendizaje anterior, se puede eliminar la tabla Q.
 
-Dentro del contenedor:
+Primero, ingresar al contenedor:
+
+```bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
+docker exec -it "$CONTAINER_ID" bash
+```
+
+Eliminar la tabla:
 
 ```bash
 rm -f /ros2_ws/q_table_granprix.json
@@ -950,86 +1271,93 @@ rm -f /ros2_ws/q_table_granprix.json
 
 Este comando es opcional.
 
-Debe utilizarse únicamente cuando se desea reiniciar el aprendizaje.
+Debe utilizarse únicamente cuando se desea reiniciar completamente el aprendizaje.
 
 Al eliminar el archivo:
 
-- Se pierden las decisiones aprendidas en corridas anteriores.
+- Se pierden las decisiones aprendidas anteriormente.
+- Se eliminan las recompensas y penalizaciones acumuladas.
 - El robot inicia con una tabla vacía o con valores predeterminados.
-- No se conservarán las penalizaciones y recompensas acumuladas.
+- Las corridas anteriores dejan de influir en las decisiones.
 
-No se debe ejecutar este comando después de una corrida si se desea conservar el aprendizaje obtenido.
+Para volver a cargar la tabla Q original, salir del contenedor:
 
-Para volver a utilizar la tabla original, copiarla nuevamente desde la Raspberry Pi:
+```bash
+exit
+```
+
+Después, desde la Raspberry Pi:
+
+```bash
+export CONTAINER_ID=ID_DEL_CONTENEDOR
+```
+
+Copiar nuevamente el archivo:
 
 ```bash
 docker cp /home/pi/NuevoProyecto/q_table_granprix_FINAL.json \
-28404cc840d6:/ros2_ws/q_table_granprix.json
+"$CONTAINER_ID":/ros2_ws/q_table_granprix.json
 ```
 
 ---
 
-# 11. Verificación previa a la carrera
+# 19. Orden resumido de ejecución
 
-Antes de iniciar `maze_solver`, comprobar los tópicos disponibles:
+| Terminal   | Nodo               | Función                                        |
+| ---------- | ------------------ | ---------------------------------------------- |
+| Terminal 1 | `camera_publisher` | Captura y publica las imágenes de la cámara.   |
+| Terminal 2 | `pare_detector`    | Detecta las señales PARE y META.               |
+| Terminal 3 | `ver_pare_debug`   | Muestra la depuración visual de la detección.  |
+| Terminal 4 | `lidar_viz`        | Muestra gráficamente las mediciones del LiDAR. |
+| Terminal 5 | `robot_dashboard`  | Presenta los estados y métricas del robot.     |
+| Terminal 6 | `maze_solver`      | Ejecuta la navegación autónoma.                |
+
+El nodo `maze_solver` debe ejecutarse al final.
+
+Primero se debe comprobar que los sensores y los nodos auxiliares funcionan correctamente.
+
+---
+
+# 20. Resumen de comandos iniciales de cada terminal
+
+Cada vez que se abra una terminal nueva, primero se debe ejecutar:
 
 ```bash
-ros2 topic list
+export CONTAINER_ID=ID_DEL_CONTENEDOR
 ```
 
-Como mínimo, deberían estar disponibles tópicos equivalentes a:
+Después, ingresar al contenedor:
+
+```bash
+docker exec -it "$CONTAINER_ID" bash
+```
+
+Dentro del contenedor, ejecutar:
+
+```bash
+cd /ros2_ws
+source install/setup.bash
+export ROS_DOMAIN_ID=20
+```
+
+Para los nodos con interfaz gráfica, agregar:
+
+```bash
+export DISPLAY=:0
+```
+
+Los nodos que requieren `DISPLAY=:0` son:
 
 ```text
-/camera/image_raw
-/scan
-/odom_raw
-/cmd_vel
+ver_pare_debug
+lidar_viz
+robot_dashboard
+dashboard_g1
 ```
-
-Verificar la cámara:
-
-```bash
-ros2 topic hz /camera/image_raw
-```
-
-Verificar el LiDAR:
-
-```bash
-ros2 topic hz /scan
-```
-
-Verificar la odometría:
-
-```bash
-ros2 topic hz /odom_raw
-```
-
-Verificar que el tópico de comandos de movimiento existe:
-
-```bash
-ros2 topic info /cmd_vel
-```
-
-Si alguno de los sensores no publica información, no se debe iniciar la navegación.
 
 ---
 
-# 12. Orden resumido de ejecución
-
-| Terminal   | Nodo               | Función                                       |
-| ---------- | ------------------ | --------------------------------------------- |
-| Terminal 1 | `camera_publisher` | Captura y publica la imagen de la cámara.     |
-| Terminal 2 | `pare_detector`    | Detecta señales PARE y META.                  |
-| Terminal 3 | `ver_pare_debug`   | Muestra la depuración visual de la detección. |
-| Terminal 4 | `lidar_viz`        | Muestra gráficamente los datos LiDAR.         |
-| Terminal 5 | `robot_dashboard`  | Presenta estados y métricas del robot.        |
-| Terminal 6 | `maze_solver`      | Controla la navegación autónoma.              |
-
-El nodo `maze_solver` siempre debe ejecutarse al final, después de comprobar que los sensores y los demás nodos se encuentran funcionando correctamente.
-
----
-
-# 13. Detención del sistema
+# 21. Detención del sistema
 
 Para detener un nodo, utilizar:
 
@@ -1046,11 +1374,13 @@ El orden recomendado para detener el sistema es:
 5. Cerrar `lidar_viz`.
 6. Cerrar `robot_dashboard`.
 
-El nodo `maze_solver` debe detenerse primero para evitar que el robot continúe enviando velocidades mientras los sensores o sistemas auxiliares se están cerrando.
+El nodo `maze_solver` debe detenerse primero para evitar que el robot continúe enviando instrucciones de movimiento mientras los sensores o nodos auxiliares se están cerrando.
 
-Como medida adicional de seguridad, se puede publicar una velocidad igual a cero:
+Como medida adicional de seguridad, dentro de un contenedor con ROS 2 configurado se puede ejecutar:
 
 ```bash
 ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist \
 "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
 ```
+
+Este comando publica una velocidad lineal y angular igual a cero.
